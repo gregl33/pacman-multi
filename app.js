@@ -3,13 +3,10 @@ const fs = require('fs');
 var express = require( "express");
 var socket_io = require( "socket.io" );
 var path = require('path');
-// var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-// var usersRouter = require('./routes/users');
 
-// var natural = require('natural');
 
 var app = express();
 // Socket.io
@@ -32,9 +29,39 @@ app.get('/', function(req, res, next) {
 });
 
 
-// app.post('/join', function(req, res, next) {
-//   res.sendFile(path.join(__dirname + '/public/html/intro.html'));
-// });
+
+
+
+let appModel = require('./models/appModel.js');
+
+
+app.route('/test/:mapid')
+  .get(function (req, res) {
+    appModel.getMapById(req.params.mapid, function(err, map) {
+      if (err){
+        res.send(err);
+      }else{
+        res.json(map);
+      }
+    });
+  });
+  app.route('/test')
+    .get(function (req, res) {
+      appModel.getAllMaps(function(err, map) {
+        if (err){
+          res.send(err);
+        }else{
+          res.json(map);
+        }
+      });
+    });
+
+
+  // .post(function (req, res) {
+  //   res.send('Add a book')
+  // })
+
+
 
 
 // socket.io events
