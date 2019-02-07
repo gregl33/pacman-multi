@@ -1,0 +1,26 @@
+{
+  "name": "pacman-multi",
+  "version": "1.0.0",
+  "description": "Web Res 2 - Pacman Multiplayer ",
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregl33/pacman-multi.git"
+  },
+  "author": "Greg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gregl33/pacman-multi/issues"
+  },
+  "homepage": "https://github.com/gregl33/pacman-multi#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "fs": "0.0.1-security",
+    "socket.io": "^2.1.1",
+    "debug": "~2.6.9",
+    "morgan": "~1.9.0",
+    "nodemon": "^1.18.6"
+  }
+}
