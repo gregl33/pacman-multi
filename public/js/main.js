@@ -1,81 +1,141 @@
 
-let socket = io();
-let player1 = {
-  x:-1,
-  y:-1
-};
-let newMove = "";
-let curr_direction = "";
-let map_ = {
-    cols: 23,
-    rows: 23,
-    tsize: 30,
-    tiles: [
-      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
-      1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
-      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
-      1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
-      1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,
-      1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,
-      1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,
-      1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
-      1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
-      1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
-      1,2,1,0,1,1,1,1001,3,0,3,100,3,0,3,0,1,1,1,0,1,2,1,
-      1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
-      1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
-      1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
-      1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,
-      1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,
-      1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,
-      1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
-      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
-      1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
-      1,3,3,3,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,3,3,3,1,
-      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-		],
-    getTile: function (col, row) {
-        return this.tiles[row * map_.cols + col];
-    },
-    updateTile: function (col, row, n) {
-      this.tiles[row * map_.cols + col] = n;
+function letsPlay() {
+let sketch = function( p5_script ) {
+  p5_script.setup = function() {
+    p5_script.createCanvas((map_.cols * map_.tsize), (map_.rows * map_.tsize));
+    p5_script.frameRate(10);
+
+    for (let i = 0; i < map_.cols; i++) {
+        for (var j = 0; j < map_.rows; j++) {
+          var n = map_.getTile(i, j);
+          switch (n) {
+            // case 100:
+            // for (o_player of otherPlayers) {
+            //    if(o_player.socketid == userID){
+            //      o_player.x = i*map_.tsize;
+            //      o_player.y = j*map_.tsize;
+            //
+            //      socket.emit('playerMoved', {
+            //          socketid:userID,
+            //          playerObj: o_player,
+            //          room:roomName,
+            //          map_tiles: map_.tiles
+            //      });
+            //    }
+            //  }
+
+
+              // break;
+            case 1001:
+              var g = findMeGhost(1001);
+              g.x = i*map_.tsize;
+              g.y = j*map_.tsize;
+              break;
+            case 1002:
+              var g = findMeGhost(1002);
+              g.x = i*map_.tsize;
+              g.y = j*map_.tsize;
+              break;
+            default:
+          }
+        }
+      }
+
+      for (let g = 0; g < ghostsArr.length; g++) {
+        ghostsArr[g]["timer"] = setTimeout(generateNewGhostMove,ghostNewPosTime,ghostsArr[g]["id"])
+      }
+  }
+
+  p5_script.draw = function() {
+    p5_script.background(200);
+    for (let i = 0; i < map_.cols; i++) {
+        for (var j = 0; j < map_.rows; j++) {
+          var n = map_.getTile(i, j);
+          if (n == 1) {
+            p5_script.fill(50);
+            p5_script.square(i*map_.tsize, j*map_.tsize, map_.tsize);
+          } else if (n == 0){
+            p5_script.fill(p5_script.color(255,153,51));
+            p5_script.square(i*map_.tsize, j*map_.tsize, map_.tsize);
+          } else if (n == 2) {
+            p5_script.fill(p5_script.color(0,0,255));
+            p5_script.square(i*map_.tsize, j*map_.tsize, map_.tsize);
+          }
+        }
+      }
+
+    p5_script.fill(150);
+
+
+    for (o_player of otherPlayers) {
+      if(o_player.socketid != userID){
+        p5_script.fill(p5_script.color(o_player.playerColor[0],o_player.playerColor[1],o_player.playerColor[2]));
+        p5_script.square(o_player.playerObj.x, o_player.playerObj.y, map_.tsize);
+        countScore(o_player.socketid,o_player.playername);
+      }else if(o_player.socketid == userID){
+
+
+        let tempPlayer1 = {
+          x:o_player.playerObj.x,
+          y:o_player.playerObj.y
+        };
+
+        let newMove_p = getNewPos(newMove,{x:o_player.playerObj.x,y:o_player.playerObj.y});
+
+        o_player.playerObj = getNewPos(curr_direction,o_player.playerObj)
+
+        if((map_.getTile((newMove_p.x/map_.tsize), (newMove_p.y/map_.tsize))) != 1 && newMove != ""){
+          o_player.playerObj.x = newMove_p.x;
+          o_player.playerObj.y = newMove_p.y;
+          curr_direction = newMove;
+          newMove = "";
+        }else{
+          if((map_.getTile((o_player.playerObj.x/map_.tsize), (o_player.playerObj.y/map_.tsize))) == 1){
+            o_player.playerObj.x = tempPlayer1.x;
+            o_player.playerObj.y = tempPlayer1.y;
+          }
+        }
+
+        if ((map_.getTile((o_player.playerObj.x/map_.tsize), (o_player.playerObj.y/map_.tsize))) == 0) {
+          map_.updateTile((o_player.playerObj.x/map_.tsize), (o_player.playerObj.y/map_.tsize), userID);
+        }
+
+        if ((map_.getTile((o_player.playerObj.x/map_.tsize), (o_player.playerObj.y/map_.tsize))) == 2) {
+          map_.updateTile((o_player.playerObj.x/map_.tsize), (o_player.playerObj.y/map_.tsize), userID);
+        }
+
+
+        p5_script.fill(p5_script.color(255,255,0));
+        p5_script.square(o_player.playerObj.x, o_player.playerObj.y, map_.tsize);
+
+
+
+        socket.emit('playerMoved', {
+            socketid:userID,
+            playerObj: {x:o_player.playerObj.x, y:o_player.playerObj.y},
+            room:roomName,
+            map_tiles: map_.tiles
+        });
+
+        countScore(o_player.socketid,o_player.playername);
+
+      }
     }
-};
-
-
-let roomName = 'test1';
-socket.emit('join', {
-    playername:'user' + Math.floor((Math.random() * 50) + 1),
-    room:roomName,
-});
-
-
-socket.on('joined', (data) => {
-  console.log(data);
-  // if(data.socketid){
-    userID = data.socketid;
-  // }
-});
-
-let otherPlayers = []
-socket.on('newPlayerJoined', data => {
-    console.log(data)
-    otherPlayers = data;
-})
-
-
-
-socket.on('otherPlayerMoved', data => {
-    console.log(data)
-    otherPlayers = data;
-
-})
 
 
 
 
-let userID = 0000;
+
+    for (let g = 0; g < ghostsArr.length; g++) {
+      // generateNewGhostMove(ghostsArr[g]["id"]);
+      // ghostNewPos(ghostsArr[g]["id"]);
+      // console.log(ghostsArr[g]["curr_direction"] + " - "+ghostsArr[g]["new_move"]);
+    }
+
+
+    // countScore()
+
+  }
 
 let ghost_1 = {
   x: -1,
@@ -83,8 +143,6 @@ let ghost_1 = {
   "new_move":"",
   "curr_direction":""
 }
-
-
 
 let ghostNewPosTime = 1000;
 let ghostsArr = [
@@ -103,37 +161,7 @@ let ghostsArr = [
   //   "id":1002
   // }
 ]
-function setup() {
-	createCanvas((map_.cols * map_.tsize), (map_.rows * map_.tsize));
-  frameRate(10);
 
-  for (let i = 0; i < map_.cols; i++) {
-      for (var j = 0; j < map_.rows; j++) {
-        var n = map_.getTile(i, j);
-        switch (n) {
-          case 100:
-            player1.x = i*map_.tsize;
-            player1.y = j*map_.tsize;
-            break;
-          case 1001:
-            var g = findMeGhost(1001);
-            g.x = i*map_.tsize;
-            g.y = j*map_.tsize;
-            break;
-          case 1002:
-            var g = findMeGhost(1002);
-            g.x = i*map_.tsize;
-            g.y = j*map_.tsize;
-            break;
-          default:
-        }
-      }
-    }
-
-    for (let g = 0; g < ghostsArr.length; g++) {
-      ghostsArr[g]["timer"] = setTimeout(generateNewGhostMove,ghostNewPosTime,ghostsArr[g]["id"])
-    }
-}
 
 function findMeGhost(id) {
   return ghostsArr.find(function(ghost) {
@@ -143,128 +171,20 @@ function findMeGhost(id) {
 
 
 
-function draw() {
-  background(200);
-  for (let i = 0; i < map_.cols; i++) {
-      for (var j = 0; j < map_.rows; j++) {
-        var n = map_.getTile(i, j);
-        if (n == 1) {
-          fill(50);
-          square(i*map_.tsize, j*map_.tsize, map_.tsize);
-        } else if (n == 0){
-          fill(color(255,153,51));
-          square(i*map_.tsize, j*map_.tsize, map_.tsize);
-        } else if (n == 2) {
-          fill(color(0,0,255));
-          square(i*map_.tsize, j*map_.tsize, map_.tsize);
-        }
+
+
+function countScore(userID_,playername_) {
+   let score = 0;
+   if(map_.tiles != null){
+     for (var i = 0; i < map_.tiles.length; i++) {
+      if (map_.tiles[i] == userID_) {
+        score++;
       }
     }
-
-  fill(150);
-
-
-
-
-
-  for (p of otherPlayers) {
-    if(p.socketid != userID){
-      fill(p.playerColor[0],p.playerColor[1],p.playerColor[2]);
-      square(p.playerObj.x, p.playerObj.y, map_.tsize);
-    }
   }
-
-
-  let tempPlayer1 = {
-    x:player1.x,
-    y:player1.y
-  };
-
-  let newMove_p = getNewPos(newMove,{x:player1.x,y:player1.y});
-
-  player1 = getNewPos(curr_direction,player1)
-
-  if((map_.getTile((newMove_p.x/map_.tsize), (newMove_p.y/map_.tsize))) != 1 && newMove != ""){
-    player1.x = newMove_p.x;
-    player1.y = newMove_p.y;
-    curr_direction = newMove;
-    newMove = "";
-  }else{
-    if((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 1){
-      player1.x = tempPlayer1.x;
-      player1.y = tempPlayer1.y;
-    }
-  }
-
-  if ((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 0) {
-    map_.updateTile((player1.x/map_.tsize), (player1.y/map_.tsize), userId);
-  }
-
-  if ((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 2) {
-    map_.updateTile((player1.x/map_.tsize), (player1.y/map_.tsize), userId);
-  }
-
-  countScore()
-
-  fill(color(255,255,0));
-  square(player1.x, player1.y, map_.tsize);
-
-
-
-
-
-  // let newMove_p_g = getNewPos(ghost_1["new_move"],{x:ghost_1.x,y:ghost_1.y});
-  //
-  // ghost_1 = getNewPos(ghost_1["curr_direction"],ghost_1);
-  //
-  // if((map_.getTile((newMove_p_g.x/map_.tsize), (newMove_p_g.y/map_.tsize))) != 1 && ghost_1["new_move"] != ""){
-  //   ghost_1.x = newMove_p_g.x;
-  //   ghost_1.y = newMove_p_g.y;
-  //   ghost_1["curr_direction"] = ghost_1["new_move"];
-  //   ghost_1["new_move"] = "";
-  // }else{
-  //   if((map_.getTile((ghost_1.x/map_.tsize), (ghost_1.y/map_.tsize))) == 1){
-  //     // player1.x = tempPlayer1.x;
-  //     // player1.y = tempPlayer1.y;
-  //     generateNewGhostMove()
-  //   }
-  // }
-  // ghostNewPos()
-  for (let g = 0; g < ghostsArr.length; g++) {
-    // generateNewGhostMove(ghostsArr[g]["id"]);
-    ghostNewPos(ghostsArr[g]["id"]);
-    // console.log(ghostsArr[g]["curr_direction"] + " - "+ghostsArr[g]["new_move"]);
-  }
-
-
-  // fill(color(255, 0, 0));
-  // square(ghost_1.x, ghost_1.y, map_.tsize);
-
-
-  socket.emit('playerMoved', {
-      socketid:userID,
-      playerObj: player1,
-      room:roomName
-  });
+  console.log(playername_ + ": " + score);
 }
 
-function countScore() {
-   let score = 0;
-   for (var i = 0; i < map_.tiles.length; i++) {
-    if (map_.tiles[i] == userId) {
-      score++  
-    }
-  }
-}
-
-function countScore() {
-   let score = 0;
-   for (var i = 0; i < map_.tiles.length; i++) {
-    if (map_.tiles[i] == userId) {
-      score++  
-    }
-  }
-}
 
 window.addEventListener("keydown", function (event) {
   if (event.defaultPrevented) {
@@ -291,27 +211,6 @@ window.addEventListener("keydown", function (event) {
       break;
   }
 });
-
-// function keyPressed() {
-//     switch (keyCode) {
-//       case 65:
-//       case 37:
-//         newMove = 'left';
-//         break;
-//       case 68:
-//       case 39:
-//         newMove = 'right';
-//         break;
-//       case 87:
-//       case 38:
-//         newMove = 'up';
-//         break;
-//       case 83:
-//       case 40:
-//         newMove = 'down';
-//         break;
-//     }
-// }
 
 
 function getNewPos(new_direction,cor_obj) {
@@ -359,8 +258,8 @@ generateNewGhostMove(ghost_id);
       ghostNewPos(ghost_id);
     }
   }
-  fill(color(255, 0, 0));
-  square(ghost.x, ghost.y, map_.tsize);
+  p5_script.fill(p5_script.color(255, 0, 0));
+  p5_script.square(ghost.x, ghost.y, map_.tsize);
 }
 
 
@@ -417,5 +316,11 @@ function generateNewGhostMove(ghost_id) {
   // ghost["new_move"] = rand;
   // // ghostNewPos(ghost_id);
   // ghost["timer"] = setTimeout(generateNewGhostMove,ghostNewPosTime,ghost_id)
+
+}
+
+
+};
+var myp5 = new p5(sketch);
 
 }

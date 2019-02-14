@@ -1,0 +1,66 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.header {
+  text-align: center;
+  padding: 32px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+
+/* Create four equal columns that sits next to each other */
+.column {
+  flex: 23%;
+  max-width: 23%;
+  padding: 0 4px;
+  border: 1px solid green;
+  border-radius: 5px;
+  padding: 20px;
+  display: inline-block;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  margin: 1% 1%;
+}
+
+.column img {
+  margin-top: 8px;
+  vertical-align: middle;
+}
+
+/* Responsive layout - makes a two column-layout instead of four columns */
+@media (max-width: 800px) {
+  .column {
+    flex: 48%;
+    max-width: 48%;
+  }
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+  .column {
+    flex: 100%;
+    max-width: 100%;
+  }
+}
+
+.roomnameInput{width: 100%;padding: 12px;font-size: 16px;margin: 10px 0px;}
+.playernameInput{width: 100%;padding: 12px;font-size: 16px;margin: 10px 0px;}
+.enterBtn{margin: auto;display: inherit;padding: 10px;width: 100px;background: green;border-radius: 10px;color: white;outline: none;border: none;margin-top: 10px;box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);}
+
+
+.hide_all_rooms{
+  display: none;
+}
+
+.disable_roomnameInput{
+
+}

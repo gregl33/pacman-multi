@@ -61,12 +61,47 @@ app.route('/test/:mapid')
   //   res.send('Add a book')
   // })
 
-
-
+  const map_ = {
+      cols: 23,
+      rows: 23,
+      tsize: 30,
+      tiles: [
+        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+        1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
+        1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+        1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
+        1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,
+        1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,
+        1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
+        1,2,1,0,1,1,1,1001,3,0,3,100,3,0,3,0,1,1,1,0,1,2,1,
+        1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
+        1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,
+        1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,
+        1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,
+        1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
+        1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+        1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
+        1,3,3,3,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,3,3,3,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+  		],
+      playerStart: {x:330,y:330}
+  };
 
 // socket.io events
 io.on( "connection", function( socket ){
   console.log( "A user connected", socket.id);
+
+
+  console.log(Object.keys(rooms));
+
+  socket.emit('user_connected', Object.keys(rooms));
+
 
 
   socket.on('join', (data) => {
@@ -74,13 +109,18 @@ io.on( "connection", function( socket ){
       console.log(data)
       if (rooms[data.room] == null) {
         rooms[data.room] = {
+          map:Object.assign({}, map_),
           players:[]
         };
+        // socket.emit('new_room', data.room);
+        socket.broadcast.emit('new_room', data.room);
+
+
       }
       let userObj = {
         playername: data.playername,
         socketid: socket.id,
-        playerObj: {},
+        playerObj: rooms[data.room]["map"]["playerStart"],
         playerColor: [Math.floor((Math.random() * 255) + 1),Math.floor((Math.random() * 255) + 1),Math.floor((Math.random() * 255) + 1)]
 
         // playerid: Math.floor((Math.random() * 1000) + 1)/
@@ -97,8 +137,8 @@ io.on( "connection", function( socket ){
 
       let res = {
         users:rooms[data.room]["players"],
-        socketid:userObj["socketid"]
-
+        socketid:userObj["socketid"],
+        map: rooms[data.room]["map"]
       }
 
       socket.emit('joined', res)
@@ -111,7 +151,12 @@ io.on( "connection", function( socket ){
 
   socket.on('playerMoved', (data) => {
 if(Object.entries(rooms).length >= 1 && rooms.constructor === Object){
+
+// console.log("room: " + data.room);
     let roomData = rooms[data.room];
+    if(data["map_tiles"] != null && data["map_tiles"].length >= 1){
+      roomData["map"].tiles = data["map_tiles"];
+    }
     let players = roomData["players"];
     // debugger;
 
@@ -133,6 +178,8 @@ if(Object.entries(rooms).length >= 1 && rooms.constructor === Object){
         players.map((user) => {
           if (user.socketid != data["socketid"]) {
             io.sockets.to(user.socketid).emit('otherPlayerMoved', players);
+            io.sockets.to(user.socketid).emit('mapUpdated', roomData["map"].tiles);
+
           }
         });
     }

@@ -6,11 +6,25 @@
 </head>
 <body>
 
+
+  <div class="row" id="all_rooms">
+    <div class="column">
+        <input class="roomnameInput" type="text" name="roomname" placeholder="Room Name" value="">
+        <input class="playernameInput" type="text" name="playername" placeholder="Player Name" value="">
+        <button class="enterBtn" type="button" name="enterBtn" onclick="startGame(event)" >Enter</button>
+    </div>
+
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
+
+  <script src="/js/index.js"></script>
 
   <script src="/js/main.js"></script>
 
   <script src="/js/p5/p5.js"></script>
+
+
 
 </body>
 </html>
