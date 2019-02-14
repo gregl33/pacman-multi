@@ -22,7 +22,7 @@ let map_ = {
       1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
       1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
       1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
-      1,0,1,0,1,1,1,1001,3,0,3,100,3,0,3,0,1,1,1,0,1,0,1,
+      1,2,1,0,1,1,1,1001,3,0,3,100,3,0,3,0,1,1,1,0,1,2,1,
       1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
       1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
       1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
@@ -32,11 +32,14 @@ let map_ = {
       1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
       1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
       1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
-      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+      1,3,3,3,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,3,3,3,1,
       1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 		],
     getTile: function (col, row) {
         return this.tiles[row * map_.cols + col];
+    },
+    updateTile: function (col, row, n) {
+      this.tiles[row * map_.cols + col] = n;
     }
 };
 
@@ -148,6 +151,12 @@ function draw() {
         if (n == 1) {
           fill(50);
           square(i*map_.tsize, j*map_.tsize, map_.tsize);
+        } else if (n == 0){
+          fill(color(255,153,51));
+          square(i*map_.tsize, j*map_.tsize, map_.tsize);
+        } else if (n == 2) {
+          fill(color(0,0,255));
+          square(i*map_.tsize, j*map_.tsize, map_.tsize);
         }
       }
     }
@@ -187,6 +196,15 @@ function draw() {
     }
   }
 
+  if ((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 0) {
+    map_.updateTile((player1.x/map_.tsize), (player1.y/map_.tsize), userId);
+  }
+
+  if ((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 2) {
+    map_.updateTile((player1.x/map_.tsize), (player1.y/map_.tsize), userId);
+  }
+
+  countScore()
 
   fill(color(255,255,0));
   square(player1.x, player1.y, map_.tsize);
@@ -230,6 +248,14 @@ function draw() {
   });
 }
 
+function countScore() {
+   let score = 0;
+   for (var i = 0; i < map_.tiles.length; i++) {
+    if (map_.tiles[i] == userId) {
+      score++  
+    }
+  }
+}
 
 window.addEventListener("keydown", function (event) {
   if (event.defaultPrevented) {
