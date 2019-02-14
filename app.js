@@ -69,7 +69,6 @@ io.on( "connection", function( socket ){
   console.log( "A user connected", socket.id);
 
 
-
   socket.on('join', (data) => {
     if (data != null ){
       console.log(data)
@@ -80,7 +79,11 @@ io.on( "connection", function( socket ){
       }
       let userObj = {
         playername: data.playername,
-        socketid: socket.id
+        socketid: socket.id,
+        playerObj: {},
+        playerColor: [Math.floor((Math.random() * 255) + 1),Math.floor((Math.random() * 255) + 1),Math.floor((Math.random() * 255) + 1)]
+
+        // playerid: Math.floor((Math.random() * 1000) + 1)/
       }
       rooms[data.room]["players"].push(userObj);
       console.log(rooms);
@@ -91,16 +94,51 @@ io.on( "connection", function( socket ){
           io.sockets.to(user.socketid).emit('newPlayerJoined', rooms[data.room]["players"])
         }
       })
+
+      let res = {
+        users:rooms[data.room]["players"],
+        socketid:userObj["socketid"]
+
+      }
+
+      socket.emit('joined', res)
     }
 
-    let res = {
-      users:rooms[data.room]["players"]
+
+
+  });
+
+
+  socket.on('playerMoved', (data) => {
+if(Object.entries(rooms).length >= 1 && rooms.constructor === Object){
+    let roomData = rooms[data.room];
+    let players = roomData["players"];
+    // debugger;
+
+
+    let p = players.find(function(player) {
+      return player.socketid == data["socketid"];
+    })
+
+// console.log(p);
+
+    if(p != null){
+      p.playerObj = data["playerObj"];
     }
 
-    socket.emit('joined', res)
+    // console.log(p);
 
-  })
 
+    if(players != null && players.length >= 2){
+        players.map((user) => {
+          if (user.socketid != data["socketid"]) {
+            io.sockets.to(user.socketid).emit('otherPlayerMoved', players);
+          }
+        });
+    }
+
+}
+  });
 
 });
 
