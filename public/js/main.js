@@ -40,21 +40,39 @@ let map_ = {
     }
 };
 
+
+let roomName = 'test1';
 socket.emit('join', {
     playername:'user' + Math.floor((Math.random() * 50) + 1),
-    room:'tesmp1'
+    room:roomName,
 });
 
 
 socket.on('joined', (data) => {
   console.log(data);
+  // if(data.socketid){
+    userID = data.socketid;
+  // }
 });
 
-
+let otherPlayers = []
 socket.on('newPlayerJoined', data => {
     console.log(data)
+    otherPlayers = data;
 })
 
+
+
+socket.on('otherPlayerMoved', data => {
+    console.log(data)
+    otherPlayers = data;
+
+})
+
+
+
+
+let userID = 0000;
 
 let ghost_1 = {
   x: -1,
@@ -136,6 +154,18 @@ function draw() {
 
   fill(150);
 
+
+
+
+
+  for (p of otherPlayers) {
+    if(p.socketid != userID){
+      fill(p.playerColor[0],p.playerColor[1],p.playerColor[2]);
+      square(p.playerObj.x, p.playerObj.y, map_.tsize);
+    }
+  }
+
+
   let tempPlayer1 = {
     x:player1.x,
     y:player1.y
@@ -185,7 +215,7 @@ function draw() {
   for (let g = 0; g < ghostsArr.length; g++) {
     // generateNewGhostMove(ghostsArr[g]["id"]);
     ghostNewPos(ghostsArr[g]["id"]);
-    console.log(ghostsArr[g]["curr_direction"] + " - "+ghostsArr[g]["new_move"]);
+    // console.log(ghostsArr[g]["curr_direction"] + " - "+ghostsArr[g]["new_move"]);
   }
 
 
@@ -193,7 +223,11 @@ function draw() {
   // square(ghost_1.x, ghost_1.y, map_.tsize);
 
 
-
+  socket.emit('playerMoved', {
+      socketid:userID,
+      playerObj: player1,
+      room:roomName
+  });
 }
 
 
@@ -299,7 +333,7 @@ function generateNewGhostMove(ghost_id) {
 
   let ghost = findMeGhost(ghost_id);
 
-  console.log(ghost);
+  // console.log(ghost);
 
 
   var _1 = map_.getTile(((ghost.x-map_.tsize)/map_.tsize), ((ghost.y-map_.tsize)/map_.tsize));
@@ -319,9 +353,9 @@ function generateNewGhostMove(ghost_id) {
 
   var _8 = map_.getTile(((ghost.x+map_.tsize)/map_.tsize), ((ghost.y+map_.tsize)/map_.tsize));
 
-  console.log(_1 + "," +_2+ "," +_3);
-  console.log(_4 + "," +t+ "," +_5);
-  console.log(_6 + "," +_7+ "," +_8);
+  // console.log(_1 + "," +_2+ "," +_3);
+  // console.log(_4 + "," +t+ "," +_5);
+  // console.log(_6 + "," +_7+ "," +_8);
 
 
 
