@@ -257,6 +257,15 @@ function countScore() {
   }
 }
 
+function countScore() {
+   let score = 0;
+   for (var i = 0; i < map_.tiles.length; i++) {
+    if (map_.tiles[i] == userId) {
+      score++  
+    }
+  }
+}
+
 window.addEventListener("keydown", function (event) {
   if (event.defaultPrevented) {
     return;
