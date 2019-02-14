@@ -1,8 +1,44 @@
 
-
-
-
 let socket = io();
+let player1 = {
+  x:-1,
+  y:-1
+};
+let newMove = "";
+let curr_direction = "";
+let map_ = {
+    cols: 23,
+    rows: 23,
+    tsize: 30,
+    tiles: [
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+      1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
+      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+      1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
+      1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,
+      1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,
+      1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,
+      1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
+      1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
+      1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
+      1,0,1,0,1,1,1,1001,3,0,3,100,3,0,3,0,1,1,1,0,1,0,1,
+      1,0,1,0,1,0,0,0,1,0,3,3,3,0,1,0,0,0,1,0,1,0,1,
+      1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,
+      1,0,1,0,1,0,1,0,1,1,1,3,1,1,1,0,1,0,1,0,1,0,1,
+      1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,
+      1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,
+      1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,
+      1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,
+      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+      1,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,
+      1,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+		],
+    getTile: function (col, row) {
+        return this.tiles[row * map_.cols + col];
+    }
+};
 
 socket.emit('join', {
     playername:'user' + Math.floor((Math.random() * 50) + 1),
@@ -19,122 +55,298 @@ socket.on('newPlayerJoined', data => {
     console.log(data)
 })
 
-var map_ = {
-    cols: 10,
-    rows: 10,
-    tsize: 50,
-    tiles: [
-      1,1,1,1,1,1,1,1,1,1,
-			1,0,0,0,0,0,0,0,0,1,
-			1,0,0,0,0,1,1,1,0,1,
-			1,0,0,0,0,0,0,0,0,1,
-			1,0,1,1,0,1,1,1,0,1,
-			1,0,0,0,0,0,0,0,0,1,
-			1,0,1,1,0,1,1,1,0,1,
-			1,0,0,0,0,0,0,0,0,1,
-			1,0,0,0,0,0,0,0,0,1,
-			1,1,1,1,1,1,1,1,1,1
-		]
-,
-    getTile: function (col, row) {
-        return this.tiles[row * map_.cols + col];
-    }
-};
 
-function setup() {
-	createCanvas(500, 500);
-  	frameRate(15);
-    // fill(150);
-    // square(2*map_.tsize, map_.tsize, map_.tsize);
-
+let ghost_1 = {
+  x: -1,
+  y: -1,
+  "new_move":"",
+  "curr_direction":""
 }
 
-var player1 = {
-  x:2*map_.tsize,
-  y:2*map_.tsize
-};
 
-function draw() {
-  console.log(player1);
-  background(200);
 
+let ghostNewPosTime = 1000;
+let ghostsArr = [
+  {
+    x: -1,
+    y: -1,
+    "new_move":"",
+    "curr_direction":"",
+    "id":1001
+  }//,
+  // {
+  //   x: -1,
+  //   y: -1,
+  //   "new_move":"",
+  //   "curr_direction":"",
+  //   "id":1002
+  // }
+]
+function setup() {
+	createCanvas((map_.cols * map_.tsize), (map_.rows * map_.tsize));
+  frameRate(10);
 
   for (let i = 0; i < map_.cols; i++) {
       for (var j = 0; j < map_.rows; j++) {
         var n = map_.getTile(i, j);
-        if (n == 1) {
+        switch (n) {
+          case 100:
+            player1.x = i*map_.tsize;
+            player1.y = j*map_.tsize;
+            break;
+          case 1001:
+            var g = findMeGhost(1001);
+            g.x = i*map_.tsize;
+            g.y = j*map_.tsize;
+            break;
+          case 1002:
+            var g = findMeGhost(1002);
+            g.x = i*map_.tsize;
+            g.y = j*map_.tsize;
+            break;
+          default:
+        }
+      }
+    }
 
+    for (let g = 0; g < ghostsArr.length; g++) {
+      ghostsArr[g]["timer"] = setTimeout(generateNewGhostMove,ghostNewPosTime,ghostsArr[g]["id"])
+    }
+}
+
+function findMeGhost(id) {
+  return ghostsArr.find(function(ghost) {
+      return ghost.id === id;
+  });
+}
+
+
+
+function draw() {
+  background(200);
+  for (let i = 0; i < map_.cols; i++) {
+      for (var j = 0; j < map_.rows; j++) {
+        var n = map_.getTile(i, j);
+        if (n == 1) {
           fill(50);
           square(i*map_.tsize, j*map_.tsize, map_.tsize);
         }
       }
     }
 
-
   fill(150);
 
-  var tempPlayer1X = player1.x;
-  var tempPlayer1Y = player1.y;
+  let tempPlayer1 = {
+    x:player1.x,
+    y:player1.y
+  };
 
-  switch (direction) {
-    case "left":
-        player1.x -= map_.tsize;
+  let newMove_p = getNewPos(newMove,{x:player1.x,y:player1.y});
 
-      break;
-    case "right":
-        player1.x += map_.tsize;
+  player1 = getNewPos(curr_direction,player1)
 
-      break;
-    case "up":
-        player1.y -= map_.tsize;
-      break;
-    case "down":
-        player1.y += map_.tsize;
-
-      break;
+  if((map_.getTile((newMove_p.x/map_.tsize), (newMove_p.y/map_.tsize))) != 1 && newMove != ""){
+    player1.x = newMove_p.x;
+    player1.y = newMove_p.y;
+    curr_direction = newMove;
+    newMove = "";
+  }else{
+    if((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 1){
+      player1.x = tempPlayer1.x;
+      player1.y = tempPlayer1.y;
+    }
   }
 
-  if((map_.getTile((player1.x/map_.tsize), (player1.y/map_.tsize))) == 1){
-    direction = "";
-    player1.x = tempPlayer1X;
-    player1.y = tempPlayer1Y;
-  }
 
+  fill(color(255,255,0));
   square(player1.x, player1.y, map_.tsize);
 
 
 
 
 
+  // let newMove_p_g = getNewPos(ghost_1["new_move"],{x:ghost_1.x,y:ghost_1.y});
+  //
+  // ghost_1 = getNewPos(ghost_1["curr_direction"],ghost_1);
+  //
+  // if((map_.getTile((newMove_p_g.x/map_.tsize), (newMove_p_g.y/map_.tsize))) != 1 && ghost_1["new_move"] != ""){
+  //   ghost_1.x = newMove_p_g.x;
+  //   ghost_1.y = newMove_p_g.y;
+  //   ghost_1["curr_direction"] = ghost_1["new_move"];
+  //   ghost_1["new_move"] = "";
+  // }else{
+  //   if((map_.getTile((ghost_1.x/map_.tsize), (ghost_1.y/map_.tsize))) == 1){
+  //     // player1.x = tempPlayer1.x;
+  //     // player1.y = tempPlayer1.y;
+  //     generateNewGhostMove()
+  //   }
+  // }
+  // ghostNewPos()
+  for (let g = 0; g < ghostsArr.length; g++) {
+    // generateNewGhostMove(ghostsArr[g]["id"]);
+    ghostNewPos(ghostsArr[g]["id"]);
+    console.log(ghostsArr[g]["curr_direction"] + " - "+ghostsArr[g]["new_move"]);
+  }
+
+
+  // fill(color(255, 0, 0));
+  // square(ghost_1.x, ghost_1.y, map_.tsize);
+
+
+
 }
 
 
-var direction;
-function keyPressed() {
-  switch (keyCode) {
-    case 65:
-    case 37:
-        direction = 'left';
-        // player1.x -= map_.tsize;
+window.addEventListener("keydown", function (event) {
+  if (event.defaultPrevented) {
+    return;
+  }
 
+  switch (event.key) {
+    case "a":
+    case "ArrowLeft":
+        newMove = 'left';
       break;
-    case 68:
-    case 39:
-        direction = 'right';
-        // player1.x += map_.tsize;
-
+    case "d":
+    case "ArrowRight":
+        newMove = 'right';
       break;
-    case 87:
-    case 38:
-        direction = 'up';
-        // player1.y -= map_.tsize;
+    case "w":
+    case "ArrowUp":
+        newMove = 'up';
       break;
-    case 83:
-    case 40:
-        direction = 'down';
-        // player1.y += map_.tsize;
-
+    case "s":
+    case "ArrowDown":
+        newMove = 'down';
 
       break;
   }
+});
+
+// function keyPressed() {
+//     switch (keyCode) {
+//       case 65:
+//       case 37:
+//         newMove = 'left';
+//         break;
+//       case 68:
+//       case 39:
+//         newMove = 'right';
+//         break;
+//       case 87:
+//       case 38:
+//         newMove = 'up';
+//         break;
+//       case 83:
+//       case 40:
+//         newMove = 'down';
+//         break;
+//     }
+// }
+
+
+function getNewPos(new_direction,cor_obj) {
+  switch (new_direction) {
+    case "left":
+        cor_obj.x -= map_.tsize;
+      break;
+    case "right":
+        cor_obj.x += map_.tsize;
+      break;
+    case "up":
+        cor_obj.y -= map_.tsize;
+      break;
+    case "down":
+        cor_obj.y += map_.tsize;
+      break;
+  }
+  return cor_obj;
+}
+
+
+function ghostNewPos(ghost_id) {
+generateNewGhostMove(ghost_id);
+  let ghost = findMeGhost(ghost_id);
+
+
+  let temp_ghost_1 = {
+    x:ghost.x,y:ghost.y
+  }
+  let newMove_p_g = getNewPos(ghost["new_move"],{x:ghost.x,y:ghost.y});
+
+  ghost = getNewPos(ghost["curr_direction"],ghost);
+
+  if((map_.getTile((newMove_p_g.x/map_.tsize), (newMove_p_g.y/map_.tsize))) != 1 && ghost["new_move"] != ""){
+    ghost.x = newMove_p_g.x;
+    ghost.y = newMove_p_g.y;
+    ghost["curr_direction"] = ghost["new_move"];
+    ghost["new_move"] = "";
+  }else{
+    if((map_.getTile((ghost.x/map_.tsize), (ghost.y/map_.tsize))) == 1){
+      ghost.x = temp_ghost_1.x;
+      ghost.y = temp_ghost_1.y;
+      generateNewGhostMove(ghost_id)
+      // ghostNewPos()
+      ghostNewPos(ghost_id);
+    }
+  }
+  fill(color(255, 0, 0));
+  square(ghost.x, ghost.y, map_.tsize);
+}
+
+
+function generateNewGhostMove(ghost_id) {
+
+  let ghost = findMeGhost(ghost_id);
+
+  console.log(ghost);
+
+
+  var _1 = map_.getTile(((ghost.x-map_.tsize)/map_.tsize), ((ghost.y-map_.tsize)/map_.tsize));
+
+  var _2 = map_.getTile((ghost.x/map_.tsize), ((ghost.y-map_.tsize)/map_.tsize));
+
+  var _3 = map_.getTile(((ghost.x+map_.tsize)/map_.tsize), ((ghost.y-map_.tsize)/map_.tsize));
+
+  var _4 = map_.getTile(((ghost.x-map_.tsize)/map_.tsize), (ghost.y/map_.tsize));
+  //
+  var t = map_.getTile((ghost.x/map_.tsize), (ghost.y/map_.tsize));
+  //
+  var _5 = map_.getTile(((ghost.x+map_.tsize)/map_.tsize), (ghost.y/map_.tsize));
+  //
+  var _6 = map_.getTile(((ghost.x-map_.tsize)/map_.tsize), ((ghost.y+map_.tsize)/map_.tsize));
+  var _7 = map_.getTile((ghost.x/map_.tsize), ((ghost.y+map_.tsize)/map_.tsize));
+
+  var _8 = map_.getTile(((ghost.x+map_.tsize)/map_.tsize), ((ghost.y+map_.tsize)/map_.tsize));
+
+  console.log(_1 + "," +_2+ "," +_3);
+  console.log(_4 + "," +t+ "," +_5);
+  console.log(_6 + "," +_7+ "," +_8);
+
+
+
+
+
+  // clearTimeout(ghost["timer"]);
+  //
+  // let moves = ["left","right","up","down"];
+  // switch (ghost["curr_direction"]) {
+  //   case "left":
+  //       moves = ["up","down"];
+  //     break;
+  //   case "right":
+  //       moves = ["up","down"];
+  //     break;
+  //   case "up":
+  //       moves = ["left","right"];
+  //     break;
+  //   case "down":
+  //       moves = ["left","right"];
+  //     break;
+  // }
+  // var rand = moves[Math.floor(Math.random() * moves.length)];
+  // ghost["new_move"] = rand;
+  // // ghostNewPos(ghost_id);
+  // ghost["timer"] = setTimeout(generateNewGhostMove,ghostNewPosTime,ghost_id)
+
 }
